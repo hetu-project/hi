@@ -4,7 +4,7 @@
 \newif\ifdraft
 \newif\ifarxiv
 
-\DeclareOption{draft}{
+\DeclareOption{workingdraft}{
     \drafttrue
 }
 \DeclareOption{arxiv}{

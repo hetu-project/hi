@@ -1,1 +1,1 @@
-The compiled artifact is hosted [here](https://hetu-project.github.io/hi/paper.pdf).
+The compiled artifact is hosted [here](https://whoiscc.github.io/hi/paper.pdf).

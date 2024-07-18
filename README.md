@@ -1,0 +1,1 @@
+The compiled artifact is hosted [here](https://hetu-project.github.io/hi/paper.pdf).

@@ -15,9 +15,12 @@
 }
 \ProcessOptions
 
-\LoadClass[acmsmall]{acmart}
+\LoadClass[acmsmall,nonacm]{acmart}
 \renewcommand\footnotetextcopyrightpermission[1]{}
 \settopmatter{printfolios=true, printacmref=false}
+\makeatletter
+\let\@authorsaddresses\@empty
+\makeatother
 
 \frenchspacing
 

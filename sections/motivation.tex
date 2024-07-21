@@ -1,72 +1,40 @@
-\paragraph{Decentralized finance.}
-We were in the age of centralized infrastructure, where all the ledger states are kept on a centralized node.
+Blockchains are \emph{monolithic} solutions for the three essentials: \emph{ordering}, \emph{execution} and \emph{finality}.
+\sgd{More well-known name for finality is \emph{consensus}, but the meaning of consensus goes blurry as it goes popular.}
+This fact itself is not a bad thing, even a good thing: these are all critical for building usable and trustable applications, while an all-in-one is always superior modular (at least in the sense of audience perception).
 
-\begin{figure}[H]
-    \includegraphics[width=300pt]{graphs/IMG_0050}
-    \Description{}
-\end{figure}
+It is bad for the other fact that, in blockchains, these three functionalities are in \emph{lockstep}.
+It orders one, it executes one, and it finalizes one.
+And only after what it can order the following ones.
+Yes there is batching, but the utilization of batching 1. exactly implies the demand of avoiding lockstep 2. is not a scalable solution and comes with inherent latency penalty.
+\sys aims \emph{real time} usages.
+So we don't consider the cases that can tolerate long latencies and can be simply solved by batching.
 
-The upside is the efficiency. Every transition reaches finality in one round trip.
-(For bids we consider the finality as the time it is guaranteed to be observable to the other bids.)
-Moreover, there's also resource efficiency: the system is running with minimal works being done.
-You can literally remove no work but still complete all transactions.
-Nothing is wasted.
+There are always active research and solutions on relieving execution from this lockstep \ie \emph{offchain computation}.
+We believe that those solutions are generalized/generalizable so that as long as blockchains can make use of them \sys can do so as well.
+This working document mostly focus on the ordering part.
 
-And the downside has been overly talked.
-The centralized operating node can manipulate the market into whatever the node wants it to look like.
-Even if directly forging the states can be prohibited (but probably just mitigated) by cryptographic, forging the control path is always doable.
-And the most obvious kind of such faults is censorship.
+\paragraph{Theoretical limit on improving finality.}
+Finality inherently comes with \emph{shared mutable states}, \ie the \emph{decisions} that reach \emph{consensus}.
+The mutations on the states must be propagated to the \emph{whole} network \emph{sequentially}, otherwise the states may go diverged.
+So we are/will be eventually trapped by the propagation speed on the finality performance.
 
-So we move on to the decentralized architecture, prevent single node to have the full control to the ledger.
+The alternative workaround is to build \emph{elite networks}.
+Under Ethereum context it is the network of stakers (or even just a subset of all stakers that (are allowed to) participant a specific round of proposal).
+By shrinking the scope of propagation to just the elites, finality gains more efficiency.
+\sgd{Ethereum probably claims the sole purpose of PoS is to be more power efficient than PoW, but I believe this reasoning on the performance of finality must also come into the play.}
 
-\begin{figure}[H]
-    \includegraphics[width=300pt]{graphs/IMG_0051}
-    \Description{}
-\end{figure}
+This solution implies \emph{homogeneity}.
+Only in a homogeneous system we can reach consensus \emph{a priori} on who are elites.
+Again under Ethereum context all stakers must stake the same kind of token \ie Ether.
+\sys aims \emph{heterogeneous} scenarios.
+We believe that in \sys, the mechanism of finality should be everyone \emph{equally}, without any \emph{qualification}, because it's impossible to define the qualification policy reasonably in a heterogeneous system \ie everyone is qualified for different tasks and commitments.
+The finality must be propagated to everyone in the same way.
 
-And we have built a market that cannot be arbitrarily manipulated by (in some definition) minority of the participating powers.
+\paragraph{The globally-unique proposer is subjective, and that results in bad quality ordering service.}
+\sgd{The argument here needs further streamlining, probably refers the presence of MEV as an evidence, and draw conclusion that ordering must be performed in an intersubjective way.}
 
-Well, since it's a market it always has some rules.
-The rules are usually objective and simple, though you can include a simple ``meta'' rule to allow everyone to add rules so that the running rules may be complicated (but still objective).
-The most noticeable property is that all rules \emph{must} be open to everyone.
-Only with this property, everyone can \emph{predict} the future ledger states, so they can decide their votes on a candidate running state.
-
-\begin{quote}
-    \small
-    I don't think zero knowledge is changing this fact.
-    While ZKP hides some input to the verifier, the logic skeleton is left in the circuit and must be revealed to the public.
-    It is theoretically possible to build circuit acting like an interpreter and put the bytecodes into witness, but then the proof probably loses all the security senses.
-\end{quote}
-
-\paragraph{Centralized decentralized market.}
-But a market that but be predicted into arbitrary future is uninteresting.
-And the unpredictable component has been the \emph{proposers}.
-Essentially, it has been the proposers who decide the events to be evaluated according the set of predefined rules, and it has been them to decide the future of the market.
-Then how are proposers chosen?
-Probabilistically toward the most ``powerful'' ones.
-So the future of a decentralized market is eventually based on the subjective opinions of the most powerful participants.
-This is the root reason for MEV stuff to be possible: subjective opinions matter in the system.
-
-The ``centralized'' decentralized market did not help us go further enough.
-While the decentralization can prevent nodes from manipulating markets in the \emph{absolutely} faulty ways, it cannot rule out all self-beneficial attempts.
-The control flows are still with (limited) vulnerability.
-And it is unsolvable with the ``define the rules and everyone follows'' approach as long as your rules do not lead to a deterministic future, which is the basic requirement for any useful system (except the ones solving scientific puzzles).
-
-The root cause of such undesirable centralization is the fact that everyone is sharing the same mutable states.
-
-\begin{figure}[H]
-    \includegraphics[width=300pt]{graphs/IMG_0061}
-    \Description{}
-\end{figure}
-
-And every mutation of the states must be initiated by \emph{someone}, instead of objective rules, to enable unpredictable markets.
-
-The current mitigation is to randomize the proposers.
-This approach trades security with performance.
-The large scope of candidate proposers of a round, the more overhead.
-This is a solution that cannot scale.
-Moreover, considering we have already traded a lot of performance for just propagating the shared state globally, this approach push us even further from the centralized markets in the sense of performance metrics.
-The quantitative differences eventually lead to substantial ones.
-There are certain services that widely provided by centralized markets, while impractical/not meaningful as smart contracts because of the poor performance.
-
-Consensus drags.
+\sys proposes a modular approach for achieving all three of ordering, execution and finality.
+Especially, while finality inherently provides ordering \ie based on the order of finalization, we deliberately \emph{deprecate} that order and roll out our own ordering mechanism that is \emph{in real time}, \emph{compatible with heterogeneity} and \emph{intersubjective}.
+\sys will eventually be general purpose, but we start small, package it as solutions for certain vertical cases.
+\sgd{Somehow we first propose a Bitcoin that later extend it into (or reveal that it is actually) Ethereum.}
+This working document focus on the case of financial markets.

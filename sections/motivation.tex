@@ -33,8 +33,13 @@ The finality must be propagated to everyone in the same way.
 \paragraph{The globally-unique proposer is subjective, and that results in bad quality ordering service.}
 \sgd{The argument here needs further streamlining, probably refers the presence of MEV as an evidence, and draw conclusion that ordering must be performed in an intersubjective way.}
 
+\sgd{Eigenlayer's intersubjectivity whitepaper \ie EIGEN token can be a supporting evidence of the necessity of introducing intersubjectivity in ordering mechanism.
+It may be worth to consider their ``forkable'' solution as an alternation to \sys and discuss their drawbacks, but hopefully their drawbacks are obvious to many.}
+
+\paragraph{The vision.}
 \sys proposes a modular approach for achieving all three of ordering, execution and finality.
 Especially, while finality inherently provides ordering \ie based on the order of finalization, we deliberately \emph{deprecate} that order and roll out our own ordering mechanism that is \emph{in real time}, \emph{compatible with heterogeneity} and \emph{intersubjective}.
 \sys will eventually be general purpose, but we start small, package it as solutions for certain vertical cases.
 \sgd{Somehow we first propose a Bitcoin that later extend it into (or reveal that it is actually) Ethereum.}
 This working document focus on the case of financial markets.
+We should definitely look at some other cases simultaneously \eg machine learning stuff.

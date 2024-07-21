@@ -1,0 +1,138 @@
+\paragraph{System overview.}
+The imagined financial market is a lot like what crypto exchanges can do today.
+Users mostly trade tokens and their derivatives in the market.
+Trading offchain merchandises are possible, and the security mechanism is nothing particular to today's offchain solutions \eg producers submit a proof of finished the work to the chain and get rewarded from smart contracts, or challengers submit a proof of producers not finishing the work to the chain to get slashing rewards from smart contracts.
+
+The users are categorized into \emph{dealers} and \emph{customers}, based on whether they are providing offers or accepting ones.
+Dealers may not be (long) sellers; they can on short position and provide offers to buy merchandises from the others.
+We will use the standard terms of \sys in the following discussion.
+The dealers are further categorized as \emph{producers} who produce the (chains of) quotes (either for sale or purchase), and \emph{broker} who produce derivatives.
+The customers are called consumers.
+
+For simplicity, we only discuss trading onchain merchandises here, and we only consider deploying to Ethereum, so the tokens would be ERC-20s and NFTs.
+Those are directly transact-able on Ethereum through interacting with smart contracts, and the advantages of \sys mirrors the ones stated in our vision:
+\begin{itemize}
+    \item Real time. 
+    It's not as simple as ``the transaction can be made faster''.
+    Because the transaction eventually still happen on the chain, and we are not doing things like preconfirmation to assure anything.
+    The ``real time'' here means real time reaction.
+    \sys allows user to action much more frequently than the finality frequency, and those are additive actions that eventually contribute to the \emph{same} finality.
+    More details later.
+    \item Heterogeneous.
+    In plain Ethereum system brokers are homogeneous \ie they are just smart contracts.
+    In \sys how brokers work is completely unspecified.
+    It's all hidden to the blockchain.
+    \item Intersubjective.
+    \sgd{This one I haven't got it clear. Skip for now.}
+\end{itemize}
+
+\paragraph{Advantage over current L1 exchanges.}
+They are centralized.
+
+\paragraph{Design overview.}
+Most of the communication/``brokerage''/potential negotiation happens offchain.
+The intermediate ``intents'' are accumulated with logical clocks.
+As soon as the intents are turning into a ``deal'', the payers submit the final logical clocks and their payments to the smart contract for finality.
+After the finality, the payee(s) also consult the smart contract with their logical clocks as proof to receive their rewards.
+These consultations can be made asynchronously and periodically batched, to reduce the overhead of interacting with the chain.
+
+\paragraph{Example: a deal.}
+The producer sells an NFT A for 1ETH.
+It (offchain) publishes a quote intent (A = 1ETH).
+The consumer buys the NFT, by submitting to \sys smart contract with the (logical clock of) quote intent and 1ETH.
+The producer later submits to \sys smart contract with the same logical clock (and the smart contract is able to verify that the producer is the owner of the clock) and receive 1ETH from the contract.
+The contract also transfer the ownership of NFT A to the consumer.
+
+In this minimal case there's no benefit of making use of \sys.
+A simple smart contract that transfers both NFT and ETH will conclude the interaction in single transaction.
+
+\paragraph{Example: a match.}
+Producer 1 sells 1ETH for 3500USDT.
+\sgd{Current market price from Google.}
+Producer 2 buys 1ETH with 3501USDT.
+The consumer generates a match intent with a logical clock merging both quotes, and sends it to producer 2.
+Producer 2 submits to \sys smart contract with 3501USDT payment.
+Later producer 1 and consumer individually consult the contract and get 1USDT and 3500USDT respectively.
+Consumer also transfers 1ETH to producer 1 during the consultation.
+
+\sgd{Why producer 2 should submit the transaction, not producer 1 or consumer?}
+\sgd{Why pays 3501USDT not 1ETH?}
+\sgd{Is this a consumer or broker? Are these producers or consumers?}
+\sgd{I'm not good at designing a market...}
+
+In comparison, with plain Ethereum the matching engine will be a smart contract \eg uniswap.
+The matching logic is public and (what's worse) it must be expressible with smart contract.
+You cannot perform a subjective matching, not even an intersubjective one.
+And further, producer 1 and producer 2 need to both interact with the matching contract.
+That probably cannot take place in the same block (without any speculation).
+However in \sys they may have adjusted their quotes for arbitrary many times before the matching is accomplished, and all those communications can happen right within 12 seconds.
+
+\paragraph{Example: a derivative.}
+\sgd{Work in progress.
+Not sure whether it's necessary to have one more example.
+A single-layer derivative should be much similar to the match, and a more deeply nested one would be too complicated to illustrate.}
+
+\paragraph{What is ordered? (again)}
+There are different concepts of \emph{ordering} in a financial system.
+Although we can generalize all of them into ``A only if B'' form, but it's worth to perform a case study.
+
+The first kind is temporal ordering.
+Consider the price of certain merchandise.
+It changes, and the current price is certainly \emph{after} its price from previous timestamp.
+In \sys we represent the quote intents as ``conditional quotes with expiration''.
+The interpretation is ``the price of the merchandise is \$X, and the price is only valid 1. before the current block (hashed Y) reaches depth Z in the chain and 2. all previous quotes of the merchandise were not finalized''.
+Finality mechanism checks for the requirements before endorsement, to prevent a merchandise to be sold more than once.
+The producers may repeatedly propose quotes for their merchandises until they are sold.
+
+The second kind is derivative ordering.
+An index intent can be ``the price of the index is \$X, and the price is only valid while all indexed quotes are valid''.
+\sgd{Intents for options can be a bit more tricky, since it involves quote intents that will be proposed in the future.
+We can design for them later.}
+Notice that all of these are not actually transactions, but instead somehow ``I would like to transact with X if Y would like to transact with me''.
+The ``letters of intent'' in this form are perfectly composable and can be arbitrary nested.
+When a highly-nested intent is finalized, a lot of intermediate transactions are finalized at once.
+In a blockchain system all these intermediate steps have to happen on chain, incurring high latency and lots of gas overhead.
+While in \sys, only one intent is submitted for finality regardless of the number of intermediate steps.
+This means perfect scalability.
+
+The last kind is transaction ordering.
+This is the ordering of mutating states.
+If two consumers buy the same merchandise, the transaction ordered first will success and the other one must be aborted.
+In the baby step described in this working document, the market states are remained on chain (though a lot of intermediate states are skipped), so such ordering corresponds to the ordering of finalization.
+\sys is not responsible for it and simply leaves it on the chain.
+
+There will be parallelization opportunities to explore in the transaction ordering.
+As a patch we may design certain derivative to ad-hoc bundle transactions into ``mega-transactions'', which make profit by reducing gas fee during finality.
+Don't know for sure whether that works.
+
+\paragraph{Current limitations.}
+There's no offchain computation in current design.
+Actually, all offchain states are intermediate, ephemeral and fine to be unreliable.
+\sgd{probably}
+Since financial is neither computational heavy (in the sense of \emph{processing transactions themselves}, not \emph{making decisions of transacting or not}) nor data heavy (ideally just one balance number per account), going offchain may not benefit much.
+
+However, not persisting states outside the chain also means we will not have our own economics.
+The settlements will be in ERC-20 and there's no necessity to roll out our own token.
+I think we probably still can make money in some way without our own token, but others (probably) may not.
+
+And after all, this is contrary to the vision states previously \ie blockchains as unordered finality, nothing more.
+It's more like an incremental contribution to current blockchain systems \ie yet another offloading/rollup solution (while substantially differs from current rollups).
+This is good for bootstrapping, but we probably should move on later.
+
+\paragraph{Sketch of smart contract design.}
+The contract's main task is to verify logical clocks.
+The verification results come with the determined ordering, and specific verification semantics should be integrated case by case.
+Finally, the contract is the temporal token holder for outstanding transactions, to enable asynchronous interaction with the chain.
+\sgd{Also enable us to make money from the system.}
+
+Take calls for an example.
+The consumer interacts with blockchain first, submits an intent of either a quote or a derivative of some intents, indicating that the consumer is willing to call with certain amount of tokens.
+The contract performs several checks, including whether the intent is equipped with a valid logical clock, whether the call conflicts with previous calls, and the other ordinary checks \eg whether consumer account has sufficient balance.
+If all checks pass, the contract transfer the tokens from consumer account to the contract account, and finalize the intent.
+
+% \paragraph{Check for confliction.}
+% The smart contract maintains a logical clock in the chain state.
+% Upon endorsing an intent, the contract merges it into its onchain clock.
+% At the result, if a submitted transaction conflicts with previously finalized ones, its clock will 
+
+\sgd{Work in progress.}

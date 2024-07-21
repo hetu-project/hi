@@ -79,8 +79,8 @@ With our ordering mechanism design, the fact that the ordering is not happening 
 \sgd{Weird material above, probably fits somewhere else.}
 
 Intents do conflict.
-That's why finality does not endorse every submitted intent, but only the compatible ones.
-What intents are compatible is application specific, and a concrete example is shown in the following section.
+That's why finality does not endorse every submitted intent, but only the \emph{compatible} ones.
+What intents are compatible is application specific, which is a topic elaborated in the following section.
 In the worst case, intents that do not reside on the same chain all conflict to each other.
 Those are the applications that essentially make use of shared mutable states, and they would better directly deploy on blockchains.
 We expect our targeted applications to have few contentions on the finality, but every finality involves a lot of collaboration efforts, and the willingness of the collaborations all come with \emph{preconditions}, or assumptions.

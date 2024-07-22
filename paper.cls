@@ -37,6 +37,7 @@
 \RequirePackage{braket}
 \RequirePackage{tikz}
 \RequirePackage{amsthm}
+\RequirePackage{wrapfig}
 
 \hypersetup{linkcolor=blue}
 

@@ -1,3 +1,7 @@
+\begin{wrapfigure}{R}{0.2\textwidth}
+    \includegraphics[width=0.2\textwidth]{graphs/IMG_0066}
+\end{wrapfigure}
+
 \paragraph{The only-for-finality mechanism.}
 The \emph{chain} structure in blockchains corresponds to its inherent ordering functionality.
 To clearly draw the difference between them and the finality mechanism in \sys, we explicitly change the representation from ``a chain of blocks'' to ``a (unordered) set of blocks''.
@@ -50,6 +54,10 @@ What bad things can happen if we don't have them?}
     The following explains this more in action.
 \end{itemize}
 
+\begin{wrapfigure}{R}{0.4\textwidth}
+    \includegraphics[width=0.4\textwidth]{graphs/IMG_0064}
+\end{wrapfigure}
+
 \paragraph{The cooperation.}
 The ordering mechanism forms a \emph{partial ordering} among the intents.
 Notice that although we represent the partial ordering as a single graph in the illustration, the graph is not shared in reality.
@@ -60,6 +68,11 @@ However, everyone's partial view is guaranteed to be \emph{compatible} to the ot
 Every partial view is a subgraph of the whole graph.
 And if you merge all subgraphs together, you just get the whole graph back, without any risk of confliction.
 \sgd{Well, these material may be a bit too technical, try rephrase it more comprehensively.}
+
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{graphs/IMG_0065}
+    \Description{}
+\end{figure}
 
 If anyone wants to finalize an intent \ie ``make a deal'' according to it, they submit the intent to finality.
 As we stated above, finality mechanism in \sys is an insert-only bag of intents.

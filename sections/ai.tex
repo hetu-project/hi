@@ -1,0 +1,55 @@
+\paragraph{Motivation and system overview.}
+The end users of AI market consumes AI services/products \eg conversation sessions, content generation, etc.
+Currently, the services are \emph{scheduled} / \emph{orchestrated} / \emph{assembled} mostly by single party.
+\sgd{Having difficulty choose the best word...}
+In another word, there's a centralized participant that contacts all the other participants in the systems, namely GPU owners, model creators, and end users.
+This one-stop architecture does not enable the full competition market and the optimal configuration of resources.
+
+The root cause of today's centralized architectures is the difficulties of efficiently collaborate in real time.
+Suppose A users own GPUs and B users owns models.
+Without further assistance, it is hard for the individuals of either A users or B users to \emph{ad hoc} find each other in real time that \emph{matches} \ie the GPUs must be capable to inference the models.
+Both of them cannot fulfill user demands alone.
+As the result, the cooperation must be negotiated ahead of time and be longstanding, which in turn requires heavier trust mechanism \eg staking.
+
+In \sys none of the participants need to take care of the whole workflow.
+The consumers, brokers and producers concept from \autoref{sec:finance} are also applied in this case.
+The producers provide GPUs and other AI hardware.
+The consumers purchase AI services by contacting one of the brokers who announce to provide the services.
+Those brokers, however, provide end user services based on the model inference services provided by other brokers.
+And those brokers that support inference rent the hardware from producers.
+The logical clocks, which order the intents all over, enable such collaboration despite every participant only works locally.
+
+\paragraph{Example: oneshot query.}
+Producer A announces intent of 10s GPU time for 1USDT.
+Broker B announces a conditional intent of ``as long as A fulfills its intent to me, I provide a llama model inference of any input for 1.01USDT''.
+Broker C announces a conditional intent of ``as long as B fulfills its intent to me, I can answer a professional question for 1.02USDT''.
+(C achieves this by sending special prompts to the model during inference.)
+Consumer D thinks ``ok I have a computer science professional question to ask and I'm willing to pay 1.02USDT''.
+Then D submit the intent announced by C and 1.02USDT to the \sys smart contract on the chain.
+
+After C's intent has reached finality on the chain, C takes D's question, combined with its special prompts that can make llama model act as a computer science professor, together send to B.
+B then perform inference with its llama model on A's GPU.
+After the task is done and the proof of work is generated (or after a while no one challenges that the work is not done correctly), A, B and C interact with \sys contract on the chain with their original intent logical clocks.
+The contract verifies their logical clocks are based by the one submitted by D (or is the same one, for C's case).
+And transfer corresponded tokens according to the intents.
+Thus, A, B and C receives 1USDT, 0.01USDT and 0.01USDT each.
+
+\paragraph{What are the clocks used for?}
+Logical clocks are crucial in the workflow above for multiple purposes.
+\begin{itemize}
+    \item B, C and D verifies the \emph{single} logical clock from its immediate predecessors, and conclude that \emph{all} previous intents are verified.
+    \item Smart contract verifies A, B and C's clocks, and the relation between their clocks and the D's one, conclude that they should be paid.
+    \item A, B and C can interact with the smart contract in arbitrary order, arbitrarily after the transaction was finalized (\ie D submitted).
+    \sys removes the necessities of \emph{synchronously} interact with the chain for all the intermediate steps.
+\end{itemize}
+
+Other than constructing conditional intents, the clocks can also be used for local ordering.
+For example, A may announce intents of every 10s of its GPU times, and each intent is ordered after the previous one.
+So that if another broker E has its intent based on a latter intent of A (based on A's ordering), then E can only utilize A's GPU after B is done.
+
+\paragraph{Discussions.}
+There's no security model here.
+In reality we need to specify one, even if it's ``yes we don't have security'' that still need to be decided.
+
+The division of GPU providers and model providers are impractical.
+If models must be sent to GPUs owners in clear text, models will not be confidential, and that's a lot of network overhead.
